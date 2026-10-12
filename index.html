@@ -53,6 +53,11 @@ h2 { font-size: 1.05rem; margin: 0; text-wrap: balance; }
 small { font-size: 0.82rem; }
 
 header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
+.head-right { display: grid; gap: 8px; justify-items: end; }
+nav { display: flex; gap: 4px; }
+nav a { text-decoration: none; color: inherit; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 0.88rem; }
+nav a[aria-current] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+@media (max-width: 520px) { .head-right { justify-items: start; } }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 3px 12px; font-size: 0.85rem; }
 .chip b { font-weight: 600; }
@@ -154,7 +159,10 @@ button:disabled { opacity: 0.5; cursor: default; }
       <div class="label">떨어지면 사고 오르면 판다</div>
       <h1>떨사오팔 주문표</h1>
     </div>
-    <div class="chips" id="chips"></div>
+    <div class="head-right">
+      <nav><a href="./" aria-current="page">주문표</a><a href="backtest.html">백테스트</a></nav>
+      <div class="chips" id="chips"></div>
+    </div>
   </header>
 
   <div class="banner" id="exampleBanner" hidden>
