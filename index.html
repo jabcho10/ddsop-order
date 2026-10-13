@@ -122,6 +122,7 @@ tr:last-child td { border-bottom: 0; }
 td { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
 td input { width: 92px; text-align: right; }
 td input.days { width: 56px; }
+td input.date { width: 140px; text-align: left; }
 .up { color: var(--buy); } .down { color: var(--sell); }
 tr.vacant td { color: var(--muted); }
 
@@ -175,6 +176,8 @@ button:disabled { opacity: 0.5; cursor: default; }
   .tiers td.t-del { grid-column: 3; grid-row: 1; justify-self: end; }
   .tiers td.t-del::before { content: none; }
   .tiers td input, .tiers td input.days { width: 100%; }
+  .tiers td.t-date { grid-column: 1 / -1; }
+  .tiers td input.date { width: 100%; max-width: 220px; }
   .tiers tr.vacant { grid-template-columns: 1fr; padding: 8px 12px; background: transparent; border-style: dashed; }
   .tiers tr.vacant td:not(.t-name) { display: none; }
   .tiers tr.vacant td.t-name { font-weight: 400; color: var(--muted); }
@@ -258,7 +261,7 @@ button:disabled { opacity: 0.5; cursor: default; }
         <tbody id="tierBody"></tbody>
       </table>
     </div>
-    <small class="muted">매수가·수량·보유일은 직접 고칠 수 있습니다. 보유일은 매수 다음 거래일부터 센 거래일 수입니다.</small>
+    <small class="muted">매수일·매수가·수량·보유일은 직접 고칠 수 있습니다. 보유일은 매수 다음 거래일부터 센 거래일 수이며, 매수일을 바꾸면 기준일까지 다시 셉니다.</small>
   </section>
 
   <section>
@@ -514,7 +517,7 @@ function render() {
     if (!t) return `<tr class="vacant"><td class="t-name">${name}티어 <span class="muted">비어 있음</span></td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td></td></tr>`;
     const tgt = ceilC(t.bp * (1 + p.sell));
     const pl = (S.prevClose - t.bp) * t.sh;
-    return `<tr><td class="t-name">${name}티어</td><td data-label="매수일">${esc(t.date || "–")}</td>
+    return `<tr><td class="t-name">${name}티어</td><td class="t-date" data-label="매수일"><input class="date" type="date" id="t${k}dt" data-k="${k}" data-f="date" value="${esc(t.date || "")}" aria-label="${k + 1}티어 매수일"></td>
       <td data-label="매수가"><input type="number" step="0.01" min="0" id="t${k}bp" data-k="${k}" data-f="bp" value="${t.bp}" aria-label="${k + 1}티어 매수가"></td>
       <td data-label="수량"><input type="number" step="1" min="0" id="t${k}sh" data-k="${k}" data-f="sh" value="${t.sh}" aria-label="${k + 1}티어 수량"></td>
       <td data-label="보유일"><input class="days" type="number" step="1" min="0" id="t${k}d" data-k="${k}" data-f="days" value="${t.days}" aria-label="${k + 1}티어 보유일"></td>
@@ -583,6 +586,16 @@ function renderRec() {
 function setVal(id, v) { const el = $(id); if (document.activeElement !== el) el.value = v ?? ""; }
 const round2 = x => Math.round(x * 100) / 100;
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function closeOn(date) { const d = dayList(S.ticker).find(x => x.date === date); return d ? round2(d.close) : null; }
+// 매수일 다음 거래일부터 기준일까지의 거래일 수. 추천 데이터 기간 안의 휴장일은 빼고, 그 밖은 평일로 센다
+function heldDays(buy, upto) {
+  if (!buy || !upto || buy >= upto) return 0;
+  const ds = dayList(S.ticker).map(x => x.date), set = new Set(ds);
+  let n = 0;
+  for (let d = nextWeekday(buy); d <= upto; d = nextWeekday(d))
+    if (!ds.length || d < ds[0] || d > ds[ds.length - 1] || set.has(d)) n++;
+  return n;
+}
 function nextWeekday(d) {
   if (!d) return new Date().toISOString().slice(0, 10);
   const t = new Date(d + "T12:00:00Z");
@@ -648,10 +661,18 @@ $("btnAddTier").addEventListener("click", () => {
 $("tierBody").addEventListener("change", e => {
   const el = e.target, k = +el.dataset.k, f = el.dataset.f;
   if (!f || !S.tiers[k]) return;
-  const v = parseFloat(el.value);
-  if (!(v >= 0)) { render(); return; }
   const t = S.tiers[k];
-  t[f] = f === "bp" ? v : Math.floor(v);
+  if (f === "date") {
+    // 매수일을 바꾸면 보유일을 다시 세고, 매수가가 옛 매수일 종가 그대로면 새 매수일 종가로 바꾼다 (LOC 매수 = 종가 체결)
+    const oldC = closeOn(t.date), newC = closeOn(el.value);
+    t.date = el.value;
+    if (t.date) t.days = heldDays(t.date, S.prevDate);
+    if (newC && (!t.bp || t.bp === oldC)) t.bp = newC;
+  } else {
+    const v = parseFloat(el.value);
+    if (!(v >= 0)) { render(); return; }
+    t[f] = f === "bp" ? v : Math.floor(v);
+  }
   t.cost = t.sh * t.bp * (1 + S.fee / 100);
   changed();
 });
@@ -707,6 +728,14 @@ $("fImport").addEventListener("change", async e => {
 render();
 initStore();
 loadRec();
+// 탭을 열어 둔 채 다음 날 다시 보면 새 종가를 못 받으므로, 화면에 돌아올 때마다 다시 받는다 (1분에 한 번까지)
+let lastFetch = Date.now();
+function refreshRec() {
+  if (document.visibilityState !== "visible" || Date.now() - lastFetch < 60000) return;
+  lastFetch = Date.now(); loadRec();
+}
+document.addEventListener("visibilitychange", refreshRec);
+window.addEventListener("pageshow", e => { if (e.persisted) refreshRec(); });
 </script>
 </body>
 </html>
