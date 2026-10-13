@@ -121,7 +121,6 @@ th:first-child, td:first-child { text-align: left; }
 tr:last-child td { border-bottom: 0; }
 td { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
 td input { width: 92px; text-align: right; }
-td input.days { width: 56px; }
 td input.date { width: 140px; text-align: left; }
 .up { color: var(--buy); } .down { color: var(--sell); }
 tr.vacant td { color: var(--muted); }
@@ -175,7 +174,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   .tiers td.t-name::before { content: none; }
   .tiers td.t-del { grid-column: 3; grid-row: 1; justify-self: end; }
   .tiers td.t-del::before { content: none; }
-  .tiers td input, .tiers td input.days { width: 100%; }
+  .tiers td input { width: 100%; }
   .tiers td.t-date { grid-column: 1 / -1; }
   .tiers td input.date { width: 100%; max-width: 220px; }
   .tiers tr.vacant { grid-template-columns: 1fr; padding: 8px 12px; background: transparent; border-style: dashed; }
@@ -261,7 +260,7 @@ button:disabled { opacity: 0.5; cursor: default; }
         <tbody id="tierBody"></tbody>
       </table>
     </div>
-    <small class="muted">매수일·매수가·수량·보유일은 직접 고칠 수 있습니다. 보유일은 매수 다음 거래일부터 센 거래일 수이며, 매수일을 바꾸면 기준일까지 다시 셉니다.</small>
+    <small class="muted">매수일·매수가·수량은 직접 고칠 수 있습니다. 보유일은 매수일 다음 거래일부터 기준일(전일 종가 날짜)까지의 거래일 수로 자동 계산됩니다(휴장일 제외).</small>
   </section>
 
   <section>
@@ -316,14 +315,14 @@ function computeOrders(S) {
   const sells = [];
   S.tiers.forEach((t, k) => {
     if (!t) return;
-    if (t.days + 1 >= p.stop) sells.push({ kind: "stop", tier: k, sh: t.sh, bp: t.bp });
+    if (tierDays(S, t) + 1 >= p.stop) sells.push({ kind: "stop", tier: k, sh: t.sh, bp: t.bp });
     else sells.push({ kind: "sell", tier: k, sh: t.sh, bp: t.bp, price: ceilC(t.bp * (1 + p.sell)) });
   });
   let buy = null;
   if (S.prevClose > 0) {
     // LOC 매도와 매수는 같은 날 체결되지 않는다: 보유 티어의 목표가는 항상 전일 종가보다 높고, 매수는 전일 종가 아래에서만 체결.
     // 그래서 매수가 체결되는 날의 상태 = 손절(MOC)만 빠진 상태이고, 손절은 아침에 알 수 있다.
-    const after = S.tiers.map(t => (t && t.days + 1 >= p.stop) ? null : t);
+    const after = S.tiers.map(t => (t && tierDays(S, t) + 1 >= p.stop) ? null : t);
     const endsToday = S.active && after.every(t => !t);   // 남은 티어가 전부 오늘 손절 -> 사이클 종료 확정
     let bs = S.strategy;
     if (endsToday && S.auto) { const r = recFor(S.ticker, S.prevDate); if (r && STRAT[r.strategy]) bs = r.strategy; }
@@ -348,6 +347,7 @@ function computeOrders(S) {
 
 // ---- 추천 데이터 (GitHub Actions 가 매일 갱신하는 data/latest.json) ----
 let REC = null;
+const HIST = {};   // 종목별 전체 거래일 종가 (loadHist)
 function dayList(ticker) { return REC && REC.tickers[ticker] ? REC.tickers[ticker].days : []; }
 function recFor(ticker, date) { const d = dayList(ticker).find(x => x.date === date); return d ? d.rec : null; }
 // 티어가 모두 비어 있으면, 마지막 반영일 종가 기준 추천 전략으로 바꾼다
@@ -371,7 +371,7 @@ function applyClose(S, close, date) {
   const notes = [];
   for (const o of orders.sells) {
     const t = S.tiers[o.tier];
-    t.days += 1;
+    t.days = tierDays(S, t) + 1;
     const hit = o.kind === "sell" && close >= o.price;
     if (hit || o.kind === "stop") {
       const proceeds = t.sh * close * (1 - fee);
@@ -451,6 +451,7 @@ async function loadRec() {
   if (S.example) S = exampleState();
   if (syncAuto(S)) persist();
   render();
+  loadHist(S.ticker);
 }
 function initStore() {
   try { const ls = localStorage.getItem(LS_KEY); if (ls && adopt(ls)) { render(); setSaveState("이 브라우저에서 불러옴"); return; } } catch (e) {}
@@ -504,7 +505,7 @@ function render() {
       rows.push(`<div class="ticket"><div class="side sell">매도</div>
         <div class="main"><span class="ty">LOC</span>${usd(s.price)} × ${s.sh}주</div>
         <div class="amt">${usd(s.price * s.sh, 0)}</div>
-        <div class="sub">${s.tier + 1}티어 · 매수가 ${usd(s.bp)} +${(p.sell * 100).toFixed(2)}% · 손절까지 ${p.stop - t.days - 1}일</div></div>`);
+        <div class="sub">${s.tier + 1}티어 · 매수가 ${usd(s.bp)} +${(p.sell * 100).toFixed(2)}% · 손절까지 ${p.stop - tierDays(S, t) - 1}일</div></div>`);
     }
   }
   if (!S.prevClose) rows.unshift(`<div class="empty">계좌와 전략에서 전일 종가를 입력하면 매수 주문이 계산됩니다.</div>`);
@@ -520,7 +521,7 @@ function render() {
     return `<tr><td class="t-name">${name}티어</td><td class="t-date" data-label="매수일"><input class="date" type="date" id="t${k}dt" data-k="${k}" data-f="date" value="${esc(t.date || "")}" aria-label="${k + 1}티어 매수일"></td>
       <td data-label="매수가"><input type="number" step="0.01" min="0" id="t${k}bp" data-k="${k}" data-f="bp" value="${t.bp}" aria-label="${k + 1}티어 매수가"></td>
       <td data-label="수량"><input type="number" step="1" min="0" id="t${k}sh" data-k="${k}" data-f="sh" value="${t.sh}" aria-label="${k + 1}티어 수량"></td>
-      <td data-label="보유일"><input class="days" type="number" step="1" min="0" id="t${k}d" data-k="${k}" data-f="days" value="${t.days}" aria-label="${k + 1}티어 보유일"></td>
+      <td data-label="보유일">${tierDays(S, t)}일</td>
       <td data-label="목표 매도가">${usd(tgt)}</td>
       <td data-label="평가손익" class="${pl >= 0 ? "up" : "down"}">${usd(pl, 0)}</td>
       <td class="t-del"><button class="link" data-del="${k}" aria-label="${k + 1}티어 삭제">삭제</button></td></tr>`;
@@ -586,11 +587,28 @@ function renderRec() {
 function setVal(id, v) { const el = $(id); if (document.activeElement !== el) el.value = v ?? ""; }
 const round2 = x => Math.round(x * 100) / 100;
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
-function closeOn(date) { const d = dayList(S.ticker).find(x => x.date === date); return d ? round2(d.close) : null; }
-// 매수일 다음 거래일부터 기준일까지의 거래일 수. 추천 데이터 기간 안의 휴장일은 빼고, 그 밖은 평일로 센다
-function heldDays(buy, upto) {
+// 거래일별 종가: data/history_<종목>.json (상장 이후 전체) + latest.json (최근)
+async function loadHist(ticker) {
+  if (HIST[ticker]) return;
+  try {
+    const res = await fetch(`data/history_${ticker}.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) return;
+    HIST[ticker] = new Map((await res.json()).rows.map(r => [r[0], r[1]]));
+    render();
+  } catch (e) {}
+}
+function closeMap(ticker) {
+  const m = new Map(HIST[ticker] || []);
+  for (const d of dayList(ticker)) m.set(d.date, d.close);
+  return m;
+}
+function closeOn(date) { const c = closeMap(S.ticker).get(date); return c ? round2(c) : null; }
+// 보유일 = 매수일 다음 거래일부터 기준일까지의 거래일 수. 매수일이 있으면 늘 이걸로 센다
+function tierDays(S, t) { return t.date && S.prevDate ? heldDays(S.ticker, t.date, S.prevDate) : t.days; }
+// 종가 데이터가 있는 기간의 휴장일은 빼고, 데이터 뒤의 날짜는 평일로 센다
+function heldDays(ticker, buy, upto) {
   if (!buy || !upto || buy >= upto) return 0;
-  const ds = dayList(S.ticker).map(x => x.date), set = new Set(ds);
+  const ds = [...closeMap(ticker).keys()].sort(), set = new Set(ds);
   let n = 0;
   for (let d = nextWeekday(buy); d <= upto; d = nextWeekday(d))
     if (!ds.length || d < ds[0] || d > ds[ds.length - 1] || set.has(d)) n++;
@@ -666,7 +684,6 @@ $("tierBody").addEventListener("change", e => {
     // 매수일을 바꾸면 보유일을 다시 세고, 매수가가 옛 매수일 종가 그대로면 새 매수일 종가로 바꾼다 (LOC 매수 = 종가 체결)
     const oldC = closeOn(t.date), newC = closeOn(el.value);
     t.date = el.value;
-    if (t.date) t.days = heldDays(t.date, S.prevDate);
     if (newC && (!t.bp || t.bp === oldC)) t.bp = newC;
   } else {
     const v = parseFloat(el.value);
@@ -691,6 +708,7 @@ bind("fTicker", v => {
   const last = dayList(v).slice(-1)[0];
   if (last && !S.active) { S.prevDate = last.date; S.prevClose = last.close; }
   syncAuto(S);
+  loadHist(v);
 });
 bind("fStrategy", v => { if (!S.active) S.strategy = v; });
 bind("fPrevDate", v => S.prevDate = v);
