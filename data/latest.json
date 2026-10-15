@@ -1,40 +1,10 @@
 {
- "generated_at": "2026-10-15T05:54:47+00:00",
+ "generated_at": "2026-10-15T23:48:38+00:00",
  "engine_fee": 0.0007,
  "tickers": {
   "SOXL": {
-   "asof": "2026-10-14",
+   "asof": "2026-10-15",
    "days": [
-    {
-     "date": "2026-09-24",
-     "close": 146.33,
-     "rec": {
-      "strategy": "Pro2",
-      "raw": "Pro2",
-      "adjustments": [],
-      "scores": {
-       "Pro1": 3.1276,
-       "Pro2": 4.0468,
-       "Pro3": 3.1961
-      },
-      "top": [
-       {
-        "date": "2014-11-06",
-        "similarity": 97.5
-       },
-       {
-        "date": "2024-05-15",
-        "similarity": 96.23
-       },
-       {
-        "date": "2021-04-05",
-        "similarity": 95.99
-       }
-      ],
-      "avg_similarity": 96.57,
-      "low_similarity": false
-     }
-    },
     {
      "date": "2026-09-25",
      "close": 151.45,
@@ -165,7 +135,7 @@
       "scores": {
        "Pro1": -0.7929,
        "Pro2": -6.2162,
-       "Pro3": -7.5468
+       "Pro3": -7.5469
       },
       "top": [
        {
@@ -253,7 +223,7 @@
       "raw": "Pro3",
       "adjustments": [],
       "scores": {
-       "Pro1": 3.2902,
+       "Pro1": 3.2903,
        "Pro2": 4.9467,
        "Pro3": 5.1116
       },
@@ -454,42 +424,42 @@
       "avg_similarity": 93.2,
       "low_similarity": false
      }
+    },
+    {
+     "date": "2026-10-15",
+     "close": 107.35,
+     "rec": {
+      "strategy": "Pro3",
+      "raw": "Pro3",
+      "adjustments": [],
+      "scores": {
+       "Pro1": 2.9493,
+       "Pro2": 5.86,
+       "Pro3": 8.2985
+      },
+      "top": [
+       {
+        "date": "2019-08-05",
+        "similarity": 96.46
+       },
+       {
+        "date": "2020-10-28",
+        "similarity": 93.57
+       },
+       {
+        "date": "2018-02-05",
+        "similarity": 92.73
+       }
+      ],
+      "avg_similarity": 94.25,
+      "low_similarity": false
+     }
     }
    ]
   },
   "TQQQ": {
-   "asof": "2026-10-14",
+   "asof": "2026-10-15",
    "days": [
-    {
-     "date": "2026-09-24",
-     "close": 78.58,
-     "rec": {
-      "strategy": "Pro1",
-      "raw": "Pro1",
-      "adjustments": [],
-      "scores": {
-       "Pro1": 0.8014,
-       "Pro2": 0.2929,
-       "Pro3": 0.1271
-      },
-      "top": [
-       {
-        "date": "2014-02-19",
-        "similarity": 98.71
-       },
-       {
-        "date": "2012-08-03",
-        "similarity": 97.71
-       },
-       {
-        "date": "2013-04-30",
-        "similarity": 97.25
-       }
-      ],
-      "avg_similarity": 97.89,
-      "low_similarity": false
-     }
-    },
     {
      "date": "2026-09-25",
      "close": 79.6,
@@ -907,6 +877,36 @@
        }
       ],
       "avg_similarity": 98.1,
+      "low_similarity": false
+     }
+    },
+    {
+     "date": "2026-10-15",
+     "close": 73.82,
+     "rec": {
+      "strategy": "Pro3",
+      "raw": "Pro3",
+      "adjustments": [],
+      "scores": {
+       "Pro1": 1.911,
+       "Pro2": 3.9995,
+       "Pro3": 4.6258
+      },
+      "top": [
+       {
+        "date": "2025-10-10",
+        "similarity": 98.84
+       },
+       {
+        "date": "2021-02-22",
+        "similarity": 98.34
+       },
+       {
+        "date": "2024-07-18",
+        "similarity": 98.12
+       }
+      ],
+      "avg_similarity": 98.43,
       "low_similarity": false
      }
     }
