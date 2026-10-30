@@ -1,40 +1,10 @@
 {
- "generated_at": "2026-10-30T01:19:42+00:00",
+ "generated_at": "2026-10-30T02:47:30+00:00",
  "engine_fee": 0.0007,
  "tickers": {
   "SOXL": {
-   "asof": "2026-10-28",
+   "asof": "2026-10-29",
    "days": [
-    {
-     "date": "2026-10-08",
-     "close": 142.52,
-     "rec": {
-      "strategy": "Pro1",
-      "raw": "Pro1",
-      "adjustments": [],
-      "scores": {
-       "Pro1": 0.9983,
-       "Pro2": 0.9724,
-       "Pro3": 0.2792
-      },
-      "top": [
-       {
-        "date": "2024-03-14",
-        "similarity": 96.57
-       },
-       {
-        "date": "2024-01-02",
-        "similarity": 96.55
-       },
-       {
-        "date": "2022-08-17",
-        "similarity": 96.5
-       }
-      ],
-      "avg_similarity": 96.54,
-      "low_similarity": false
-     }
-    },
     {
      "date": "2026-10-09",
      "close": 139.76,
@@ -454,42 +424,42 @@
       "avg_similarity": 96.63,
       "low_similarity": false
      }
-    }
-   ]
-  },
-  "TQQQ": {
-   "asof": "2026-10-28",
-   "days": [
+    },
     {
-     "date": "2026-10-08",
-     "close": 80.23,
+     "date": "2026-10-29",
+     "close": 102.39,
      "rec": {
       "strategy": "Pro1",
       "raw": "Pro1",
       "adjustments": [],
       "scores": {
-       "Pro1": -0.1386,
-       "Pro2": -2.248,
-       "Pro3": -1.765
+       "Pro1": 0.675,
+       "Pro2": -1.5921,
+       "Pro3": -5.1593
       },
       "top": [
        {
-        "date": "2024-10-08",
-        "similarity": 98.24
+        "date": "2022-02-01",
+        "similarity": 97.38
        },
        {
-        "date": "2016-04-07",
-        "similarity": 97.82
+        "date": "2022-09-12",
+        "similarity": 96.76
        },
        {
-        "date": "2018-05-31",
-        "similarity": 97.58
+        "date": "2025-03-18",
+        "similarity": 96.38
        }
       ],
-      "avg_similarity": 97.88,
+      "avg_similarity": 96.84,
       "low_similarity": false
      }
-    },
+    }
+   ]
+  },
+  "TQQQ": {
+   "asof": "2026-10-29",
+   "days": [
     {
      "date": "2026-10-09",
      "close": 81.28,
@@ -530,7 +500,7 @@
       "scores": {
        "Pro1": -0.059,
        "Pro2": -2.5889,
-       "Pro3": -1.5255
+       "Pro3": -1.5254
       },
       "top": [
        {
@@ -907,6 +877,36 @@
        }
       ],
       "avg_similarity": 98.17,
+      "low_similarity": false
+     }
+    },
+    {
+     "date": "2026-10-29",
+     "close": 69.26,
+     "rec": {
+      "strategy": "Pro2",
+      "raw": "Pro2",
+      "adjustments": [],
+      "scores": {
+       "Pro1": 1.1548,
+       "Pro2": 1.8102,
+       "Pro3": 1.035
+      },
+      "top": [
+       {
+        "date": "2021-05-17",
+        "similarity": 98.73
+       },
+       {
+        "date": "2023-08-21",
+        "similarity": 97.91
+       },
+       {
+        "date": "2023-03-13",
+        "similarity": 97.68
+       }
+      ],
+      "avg_similarity": 98.11,
       "low_similarity": false
      }
     }
