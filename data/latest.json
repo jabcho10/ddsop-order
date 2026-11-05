@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-04T07:29:46+00:00",
+ "generated_at": "2026-11-05T01:45:10+00:00",
  "engine_fee": 0.0007,
  "tickers": {
   "SOXL": {
@@ -529,7 +529,7 @@
       "adjustments": [],
       "scores": {
        "Pro1": 0.0332,
-       "Pro2": 0.8618,
+       "Pro2": 0.8619,
        "Pro3": 1.5257
       },
       "top": [
@@ -739,7 +739,7 @@
       "adjustments": [],
       "scores": {
        "Pro1": 1.524,
-       "Pro2": 2.2503,
+       "Pro2": 2.2504,
        "Pro3": 3.1496
       },
       "top": [
