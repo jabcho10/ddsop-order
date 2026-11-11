@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-11T02:55:34+00:00",
+ "generated_at": "2026-11-11T07:44:36+00:00",
  "engine_fee": 0.0007,
  "tickers": {
   "SOXL": {
@@ -75,7 +75,7 @@
       "scores": {
        "Pro1": 3.445,
        "Pro2": 7.2113,
-       "Pro3": 7.9637
+       "Pro3": 7.9636
       },
       "top": [
        {
@@ -483,7 +483,7 @@
        },
        {
         "date": "2014-12-17",
-        "similarity": 98.19
+        "similarity": 98.2
        }
       ],
       "avg_similarity": 98.45,
@@ -619,7 +619,7 @@
       "adjustments": [],
       "scores": {
        "Pro1": 1.2965,
-       "Pro2": 3.0843,
+       "Pro2": 3.0844,
        "Pro3": 3.5617
       },
       "top": [
